@@ -4,10 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+jupyter = "*"
+notebook = "*"
 
 [packages]
 requests = "*"
 nltk = "==3.3"
+punkt = "*"
 
 [requires]
 python_version = "3.7"
