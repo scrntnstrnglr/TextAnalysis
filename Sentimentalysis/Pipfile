@@ -12,6 +12,7 @@ requests = "*"
 nltk = "==3.3"
 punkt = "*"
 matplotlib = "*"
+wnaffect = "*"
 
 [requires]
 python_version = "3.7"
