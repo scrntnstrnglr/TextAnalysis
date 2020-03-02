@@ -1,0 +1,13 @@
+BEFORE AND AFTER ANALYSIS OF DUBLIN ELECTIONS.
+
+
+1. analyze public emotions before and after elections.
+   -- mentions, hashtags
+2. analyze for particular candidates, how people felt before and after the elections.
+   -- get names of candidates in hashtags, mentions 
+3. analyze support for particular parites before and after elections.
+   -- search params : names of political parties
+   
+   
+Paramaters: 
+	1. dates : before date: 8th of Dec to 8th of February (inclusive) and after 9th of Feb to 29th Feb
