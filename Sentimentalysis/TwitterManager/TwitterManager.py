@@ -9,6 +9,8 @@ class TwitterManager:
         self.load_data(data_file)
     
     def load_data(self,data_file):
+        self.tweet_tokens=[]
+        self.tweets_list=[]
         with open(data_file,encoding="utf8") as csv_file:
             csv_reader=csv.DictReader(csv_file,delimiter=',')
             line_count=0
