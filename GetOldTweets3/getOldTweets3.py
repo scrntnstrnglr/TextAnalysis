@@ -28,17 +28,19 @@ candidates_dict = {
 #        "Mary_Lou_McDonald": ["@MaryLouMcDonald","Mary Lou McDonald"],
 #        "Leo_Varadkar": ["@LeoVaradkar", "Leo Varadkar"],
 #
-        "Fine_Gael": ["#finegael", "@FineGael"],
+#        "Fine_Gael": ["#finegael", "@FineGael"],
 #        "Fianna_Fáil": ["#fiannafail", "@fiannafailparty"],
 #        "Sinn_Féin": ["#sinnfein", "@sinnfeinireland"],
 #        "Green_Party": ["#greenparty", "@greenparty_ie"],
 #        "Labour": ["#labour", "@labour"],
 #        "Social_Democrats": ["#socdem", "@SocDems"],
 #        "Solidarity_People_Before_Profit": ["#pb4p", "@pb4p"]
+
+#        "Hashtags": ["#ge2020", "#ge20", "#generalelections2020", "#leadersdebate", #generalelection2020", "#generalelection" ],
 }
 
-before = True
-#before = False
+#before = True
+before = False
 
 for key, values in candidates_dict.items():
     if(before):
