@@ -80,10 +80,9 @@ class TwitterManager:
         return self.tweet_tokens
 
     def dump_to_json(self,dir,file_name,data):
+        print('Writing data to json for ',file_name)
         with open(os.path.join(self.root_path,dir,file_name), 'w') as outfile:
             json.dump(data, outfile)
-
-
 
 def main():
     cwd=os.getcwd()
