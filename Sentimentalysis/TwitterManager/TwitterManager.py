@@ -14,6 +14,18 @@ class TwitterManager:
     def __init__(self,data_file_dir,name=None):
         self.load_data(data_file_dir,name)
 
+    def create_data_structure(self,this_files):
+        file_names=[]
+        data_structure={}
+        for item in this_files:
+           name=item[:item.rindex('_')]
+           if name not in file_names:
+               file_names.append(name)
+               data_structure[name] = {} 
+               data_structure[name]['after'] = []
+               data_structure[name]['before'] = []
+        return data_structure
+
     def load_data(self,data_file_dir,name):
         this_file_dict={}
         this_tokens_dict={}
@@ -26,26 +38,32 @@ class TwitterManager:
         else:
             this_files = files
 
+        self.tweet_list_dict=self.create_data_structure(this_files)
+        self.tweet_token_dict=self.create_data_structure(this_files)
+
         pbar=ProgressBar()
         print("Reading files....")
         for csv_file in pbar(this_files):
+            this_tweets=[]
+            this_tweet_tokens = []
             this_file_name=csv_file[:csv_file.rindex('_')]
             seqs=csv_file.split('_')
             seq=seqs[len(seqs)-1]
             this_file_seq=seq.split('.')[0]
             this_tweets=self.create_tweets_list(os.path.join(data_file_dir,csv_file))
+            self.tweet_list_dict[this_file_name][this_file_seq]=this_tweets
             this_tweet_tokens=self.tokenize(this_tweets)
-            this_file_dict[this_file_seq]=this_tweets
-            self.tweet_list_dict[this_file_name]=this_file_dict
-            this_tokens_dict[this_file_seq]=this_tweet_tokens
-            self.tweet_token_dict[this_file_name]=this_tokens_dict
+            self.tweet_token_dict[this_file_name][this_file_seq] = this_tweet_tokens
         
+        '''
         if name is not None:
             self.dump_to_json('jsons',name+".tweets.json",self.tweet_list_dict)
             self.dump_to_json('jsons',name+".tokens.json",self.tweet_token_dict)
         else:
             self.dump_to_json('jsons',"all.tweets.json",self.tweet_list_dict)
             self.dump_to_json('jsons',"all.tokens.json",self.tweet_token_dict)
+        '''
+        
     
     def create_tweets_list(self,data_file):
         self.tweet_tokens=[]
@@ -86,7 +104,7 @@ class TwitterManager:
 
 def main():
     cwd=os.getcwd()
-    obj = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\testdatasets','test')
+    obj = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\testdatasets')
     #tweets_list=obj.get_tweets_list()
     #print(len(tweets_list))
     #tweets_tokens=obj.tokenize(tweets_list)

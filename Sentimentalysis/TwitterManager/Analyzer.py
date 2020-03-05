@@ -1,22 +1,28 @@
-import nltk, re, string, random
+from TwitterManager import TwitterManager
+from progressbar import ProgressBar
+import json
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
+from Lexicon import Lexicon
+from nltk import FreqDist, classify, NaiveBayesClassifier
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.tag import pos_tag
+from nltk.corpus import twitter_samples, stopwords
+import nltk
+import re
+import string
+import random,os
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import numpy as np
+import pathlib
 nltk.download('twitter_samples')
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('stopwords')
-from nltk.corpus import twitter_samples, stopwords
-from nltk.tag import pos_tag
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk import FreqDist, classify, NaiveBayesClassifier
-from Lexicon import Lexicon
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
-import json
-from progressbar import ProgressBar
-from TwitterManager import TwitterManager
+
+root_path = pathlib.Path(__file__).parents[1]
 
 def lemmatize_sentence(tokens):
     '''
@@ -35,7 +41,8 @@ def lemmatize_sentence(tokens):
         lemmatized_sentence.append(lemmatizer.lemmatize(word, pos))
     return lemmatized_sentence
 
-def remove_noise(tweet_tokens, stop_words = ()):
+
+def remove_noise(tweet_tokens, stop_words=()):
     '''
     Removing stop words like 'is', 'the' etc. lemmatize_sentence() function implementation is 
     reused here.
@@ -43,9 +50,9 @@ def remove_noise(tweet_tokens, stop_words = ()):
     cleaned_tokens = []
 
     for token, tag in pos_tag(tweet_tokens):
-        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
-                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
-        token = re.sub("(@[A-Za-z0-9_]+)","", token)
+        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'
+                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', token)
+        token = re.sub("(@[A-Za-z0-9_]+)", "", token)
 
         if tag.startswith("NN"):
             pos = 'n'
@@ -61,19 +68,138 @@ def remove_noise(tweet_tokens, stop_words = ()):
             cleaned_tokens.append(token.lower())
     return cleaned_tokens
 
+
 def get_all_words(cleaned_tokens_list):
     for tokens in cleaned_tokens_list:
         for token in tokens:
             yield token
+
 
 def get_tweets_for_model(cleaned_tokens_list):
     for tweet_tokens in cleaned_tokens_list:
         yield dict([token, True] for token in tweet_tokens)
 
 
+def plot_overall_count(before_count, after_count):
+    fig = plt.figure()
+    tweet_type = ['After', 'Before']
+    tweet_counts = [after_count, before_count]
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.bar(tweet_type, tweet_counts)
+    name='overall.png'
+    plt.savefig(os.path.join(root_path,'plots',name), bbox_inches="tight")
+
+
+def plot_emotion_graphs(emotions_after, emotions_before, name):
+    emotions_colors = {'anger': 'red', 'anticipation': 'purple', 'disgust': 'yellow', 'fear': 'indigo', 'joy': 'green',
+                       'negative': 'black', 'positive': 'pink', 'sadness': 'blue', 'surprise': 'maroon', 'trust': 'orange', 'unclassified': 'cyan'}
+
+    #labels = list(emotions_colors.keys())
+    #handles = [plt.Rectangle((1,1),1,1, color=emotions_colors[label]) for label in labels]
+    my_cmap = cm.get_cmap('jet')
+    ind = np.arange(len(emotions_after))
+    width = 0.3
+    fig = plt.figure(num=None, figsize=(10, 6), dpi=80,facecolor='w', edgecolor='k')
+    fig.suptitle('Emotional Analysis of tweets for '+name, fontsize=16)
+    ax = fig.add_subplot(111)
+    pos_bars = ax.bar(ind, list(emotions_after.values()),width, color='g', align='center')
+    neg_bars = ax.bar(ind+width, list(emotions_before.values()),width, color='r', align='center')
+    ax.set_ylabel('Count')
+    ax.set_xticklabels(list(emotions_after.keys()), rotation=90)
+    ax.set_xticks(ind+width/2)
+    ax.legend((pos_bars[0], neg_bars[0]), ('After', 'Before'))
+
+
+    def autolabel(bars):
+        for bar in bars:
+            h = bar.get_height()
+            ax.text(bar.get_x()+bar.get_width()/2., 1.05*h, '%d' % int(h),ha='center', va='bottom')
+
+
+    autolabel(pos_bars)
+    autolabel(neg_bars)
+
+    name=name+'.png'
+    plt.savefig(os.path.join(root_path,'plots',name), bbox_inches="tight")
+
 
 def main():
-    obj = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\Datasets')
+    
+    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\testdatasets')
+    all_tweets = twitterati.get_tweets()
+    all_tweets_tokens = twitterati.get_tweet_tokens()
+
+    print('Total comparable entities: ',len(all_tweets))
+    pbar=ProgressBar()
+    for item in pbar(all_tweets_tokens.keys()):
+        after_tweets = all_tweets_tokens[item]['after']
+        before_tweets = all_tweets_tokens[item]['before']
+        print('%s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+
+    
+        #Cleaning tokens
+        
+        after_cleaned_tokens_list = []
+        before_cleaned_tokens_list = []
+        stop_words = stopwords.words('english')
+        print("Cleaning after tokens....")
+        pbar1 = ProgressBar()
+        for tokens in pbar1(after_tweets):
+            after_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+        print("Cleaning before tokens....")
+        pbar2 = ProgressBar()
+        for tokens in pbar2(before_tweets):
+            before_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+        
+        after_tokens_for_model = get_tweets_for_model(after_cleaned_tokens_list)
+        before_tokens_for_model =get_tweets_for_model(before_cleaned_tokens_list)
+
+        emotion_fetcher = Lexicon("C:/Users/SIDDHARTHA/Trinity/TextAnalysis/TextAnalysis/Sentimentalysis/NRC-Sentiment-Emotion-Lexicons/NRC-Sentiment-Emotion-Lexicons/NRC-Emotion-Lexicon-v0.92/NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
+        emotions_count_dict_after = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"negative":0,"positive":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
+
+        print("Creating count for after tweets...")
+        pos_count=0
+        emotions_list=[]
+        pos_word_list=[]
+
+        for tweet_dict in after_tokens_for_model:
+            for word,tag in pos_tag(tweet_dict):
+                pos_word_list.append(word)
+            pos_count+=1
+            
+        for word in pos_word_list:
+            for sentiment in emotion_fetcher.get_emotion(word):
+                emotions_count_dict_after[sentiment]+=1
+
+
+        print(emotions_count_dict_after)
+        print(pos_count)
+
+
+        emotions_count_dict_before = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"negative":0,"positive":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
+        print("Creating count for before tweets...")
+        neg_count=0
+        emotions_list=[]
+        neg_word_list=[]
+        for tweet_dict in before_tokens_for_model:
+            for word,tag in pos_tag(tweet_dict):
+                neg_word_list.append(word)
+            neg_count+=1
+
+ 
+        for word in neg_word_list:
+            for sentiment in emotion_fetcher.get_emotion(word):
+                emotions_count_dict_before[sentiment]+=1
+
+
+        print(emotions_count_dict_before)
+        print(neg_count)
+    
+
+        plot_overall_count(pos_count, neg_count)
+        plot_emotion_graphs(emotions_count_dict_after,emotions_count_dict_before,item)
 
 if __name__ == '__main__':
     main()
