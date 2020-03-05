@@ -125,7 +125,7 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
 
 def main():
     
-    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\testdatasets')
+    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\Datasets')
     all_tweets = twitterati.get_tweets()
     all_tweets_tokens = twitterati.get_tweet_tokens()
 
@@ -198,7 +198,13 @@ def main():
         print(neg_count)
     
 
-        plot_overall_count(pos_count, neg_count)
+        #removing positive and negative keys from dict.
+        del emotions_count_dict_after['positive']
+        del emotions_count_dict_after['negative']
+        del emotions_count_dict_before['positive']
+        del emotions_count_dict_before['negative']
+
+        #plot_overall_count(pos_count, neg_count)
         plot_emotion_graphs(emotions_count_dict_after,emotions_count_dict_before,item)
 
 if __name__ == '__main__':
