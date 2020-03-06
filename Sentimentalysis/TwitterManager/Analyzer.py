@@ -21,7 +21,7 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('stopwords')
-
+import random
 root_path = pathlib.Path(__file__).parents[1]
 
 def lemmatize_sentence(tokens):
@@ -125,18 +125,31 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
 
 def main():
     
-    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\Datasets')
+    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\Datasets\\parties')
     all_tweets = twitterati.get_tweets()
     all_tweets_tokens = twitterati.get_tweet_tokens()
-
+    limit=1500
     print('Total comparable entities: ',len(all_tweets))
     pbar=ProgressBar()
     for item in pbar(all_tweets_tokens.keys()):
         after_tweets = all_tweets_tokens[item]['after']
         before_tweets = all_tweets_tokens[item]['before']
-        print('%s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+        print('Before cleaning:: %s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+        after_tweets_no_dup = []
+        before_tweets_no_dup = []
+        [after_tweets_no_dup.append(x) for x in after_tweets if x not in after_tweets_no_dup] 
+        [before_tweets_no_dup.append(x) for x in before_tweets if x not in before_tweets_no_dup] 
+        after_tweets=after_tweets_no_dup
+        before_tweets=before_tweets_no_dup
+        print('After cleaning:: %s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+        print('Randomizing.....')
+        if len(after_tweets)>limit: 
+            after_tweets=random.sample(after_tweets,limit)
+        if len(before_tweets)>limit:
+            before_tweets=random.sample(before_tweets,limit)
 
-    
+        print('After randomizing:: %s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+        
         #Cleaning tokens
         
         after_cleaned_tokens_list = []
@@ -175,6 +188,8 @@ def main():
 
 
         print(emotions_count_dict_after)
+        dump_file_name="emotions_"+item+"_after.json"
+        twitterati.dump_to_json('jsons',dump_file_name,emotions_count_dict_after)
         print(pos_count)
 
 
@@ -195,6 +210,8 @@ def main():
 
 
         print(emotions_count_dict_before)
+        dump_file_name="emotions_"+item+"_before.json"
+        twitterati.dump_to_json('jsons',dump_file_name,emotions_count_dict_after)
         print(neg_count)
     
 
