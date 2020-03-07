@@ -184,12 +184,17 @@ class TweetManager:
 
         # Step 1, prepare a single-line string for re convenience
         puc = chr(0xE001)
-        html = html.replace("\n", puc)
+
+        # adding check to replace if html is not None
+        html = html and html.replace("\n", puc)
 
         # Step 2, find images that represent emoji, replace them with the
         # Unicode codepoint of the emoji.
         text = ""
-        match = imgre.match(html)
+
+        # adding check to replace if html is not None
+        match = html and imgre.match(html)
+
         while match:
             text += match.group(1)
             img = match.group(2)
@@ -209,12 +214,16 @@ class TweetManager:
                 text += " "
 
             match = imgre.match(html)
-        text = text + html
+
+        # adding check to return empty string if html is None
+        text = text + ("" if html is None else html)
 
         # Step 3, find links and replace them with the actual URL
         html = text
         text = ""
-        match = are.match(html)
+
+        # adding check to replace if html is not None
+        match = html and are.match(html)
         while match:
             text += match.group(1)
             link = match.group(2)
@@ -234,13 +243,17 @@ class TweetManager:
                 pass
 
             match = are.match(html)
-        text = text + html
+
+        # adding check to return empty string if html is None
+        text = text + ("" if html is None else html)
 
         # Step 4, discard any other markup that happens to be in the tweet.
         # This makes textify() behave like tweetPQ.text()
         html = text
         text = ""
-        match = htmlre.match(html)
+
+        # adding check to replace if html is not None
+        match = html and htmlre.match(html)
         while match:
             text += match.group(1)
             html = match.group(3)
