@@ -94,6 +94,17 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
     emotions_colors = {'anger': 'red', 'anticipation': 'purple', 'disgust': 'yellow', 'fear': 'indigo', 'joy': 'green',
                        'negative': 'black', 'positive': 'pink', 'sadness': 'blue', 'surprise': 'maroon', 'trust': 'orange', 'unclassified': 'cyan'}
 
+
+    total = sum(emotions_after.values())
+    for key in emotions_after:
+        percent=(emotions_after[key]/total)*100
+        emotions_after[key]=percent
+
+    total = sum(emotions_before.values())
+    for key in emotions_before:
+        percent=(emotions_before[key]/total)*100
+        emotions_before[key]=percent
+
     #labels = list(emotions_colors.keys())
     #handles = [plt.Rectangle((1,1),1,1, color=emotions_colors[label]) for label in labels]
     my_cmap = cm.get_cmap('jet')
@@ -102,18 +113,18 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
     fig = plt.figure(num=None, figsize=(10, 6), dpi=80,facecolor='w', edgecolor='k')
     fig.suptitle('Emotional Analysis of tweets for '+name, fontsize=16)
     ax = fig.add_subplot(111)
-    pos_bars = ax.bar(ind, list(emotions_after.values()),width, color='g', align='center')
-    neg_bars = ax.bar(ind+width, list(emotions_before.values()),width, color='r', align='center')
-    ax.set_ylabel('Count')
+    pos_bars = ax.bar(ind, list(emotions_before.values()),width, color='g', align='center')
+    neg_bars = ax.bar(ind+width, list(emotions_after.values()),width, color='r', align='center')
+    ax.set_ylabel('% age')
     ax.set_xticklabels(list(emotions_after.keys()), rotation=90)
     ax.set_xticks(ind+width/2)
-    ax.legend((pos_bars[0], neg_bars[0]), ('After', 'Before'))
+    ax.legend((pos_bars[0], neg_bars[0]), ('Before', 'After'))
 
 
     def autolabel(bars):
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x()+bar.get_width()/2., 1.05*h, '%d' % int(h),ha='center', va='bottom')
+            ax.text(bar.get_x()+bar.get_width()/2., 1.05*h, '%.1f'%float(h),ha='center', va='bottom')
 
 
     autolabel(pos_bars)
@@ -125,10 +136,10 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
 
 def main():
     
-    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\Datasets\\parties')
+    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\AllParties')
     all_tweets = twitterati.get_tweets()
     all_tweets_tokens = twitterati.get_tweet_tokens()
-    limit=1500
+    limit=1500  #limit for parties=1500, rb=740,hashtags=11000
     print('Total comparable entities: ',len(all_tweets))
     pbar=ProgressBar()
     for item in pbar(all_tweets_tokens.keys()):
