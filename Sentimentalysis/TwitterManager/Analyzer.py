@@ -22,6 +22,7 @@ nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('stopwords')
 import random
+import operator
 root_path = pathlib.Path(__file__).parents[1]
 
 def lemmatize_sentence(tokens):
@@ -92,7 +93,7 @@ def plot_overall_count(before_count, after_count):
 
 def plot_emotion_graphs(emotions_after, emotions_before, name):
     emotions_colors = {'anger': 'red', 'anticipation': 'purple', 'disgust': 'yellow', 'fear': 'indigo', 'joy': 'green',
-                       'negative': 'black', 'positive': 'pink', 'sadness': 'blue', 'surprise': 'maroon', 'trust': 'orange', 'unclassified': 'cyan'}
+                       'against': 'black', 'for': 'pink', 'sadness': 'blue', 'surprise': 'maroon', 'trust': 'orange', 'unclassified': 'cyan'}
 
 
     total = sum(emotions_after.values())
@@ -136,11 +137,12 @@ def plot_emotion_graphs(emotions_after, emotions_before, name):
 
 def main():
     
-    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\AllParties')
+    twitterati = TwitterManager('C:\\Users\\SIDDHARTHA\\Trinity\\TextAnalysis\\TextAnalysis\\GetOldTweets3\\AllCandidates')
     all_tweets = twitterati.get_tweets()
     all_tweets_tokens = twitterati.get_tweet_tokens()
     limit=1500  #limit for parties=1500, rb=740,hashtags=11000
     print('Total comparable entities: ',len(all_tweets))
+    total_tweets={}
     pbar=ProgressBar()
     for item in pbar(all_tweets_tokens.keys()):
         after_tweets = all_tweets_tokens[item]['after']
@@ -153,6 +155,9 @@ def main():
         after_tweets=after_tweets_no_dup
         before_tweets=before_tweets_no_dup
         print('After cleaning:: %s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
+        total_tweets[item+"_after"]=len(after_tweets)
+        total_tweets[item+"_before"]=len(before_tweets)
+        '''
         print('Randomizing.....')
         if len(after_tweets)>limit: 
             after_tweets=random.sample(after_tweets,limit)
@@ -160,7 +165,7 @@ def main():
             before_tweets=random.sample(before_tweets,limit)
 
         print('After randomizing:: %s has %d tweets after the election and %d tweets before the election' %(item,len(after_tweets),len(before_tweets)))
-        
+        '''
         #Cleaning tokens
         
         after_cleaned_tokens_list = []
@@ -181,59 +186,103 @@ def main():
         before_tokens_for_model =get_tweets_for_model(before_cleaned_tokens_list)
 
         emotion_fetcher = Lexicon("C:/Users/SIDDHARTHA/Trinity/TextAnalysis/TextAnalysis/Sentimentalysis/NRC-Sentiment-Emotion-Lexicons/NRC-Sentiment-Emotion-Lexicons/NRC-Emotion-Lexicon-v0.92/NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
-        emotions_count_dict_after = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"negative":0,"positive":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
+        emotions_count_dict_after = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"against":0,"for":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
 
         print("Creating count for after tweets...")
         pos_count=0
         emotions_list=[]
         pos_word_list=[]
-
         for tweet_dict in after_tokens_for_model:
+            sent_dict={"anger": 0,"anticipation": 0,"disgust": 0,"fear": 0,"joy": 0,"against": 0,"for": 0,"sadness": 0,"surprise": 0,"trust": 0,"unclassified": 0}
             for word,tag in pos_tag(tweet_dict):
-                pos_word_list.append(word)
+                for sentiment in emotion_fetcher.get_emotion(word):
+                    sent_dict[sentiment]+=1
+            del sent_dict['anger']
+            del sent_dict['anticipation']
+            del sent_dict['disgust']
+            del sent_dict['fear']
+            #del sent_dict['joy']
+            #del sent_dict['against']
+            #del sent_dict['for']
+            del sent_dict['sadness']
+            #del sent_dict['surpirse']
+            #del sent_dict['trust']
+            del sent_dict['unclassified']
+            max_sent=max(sent_dict.items(), key=operator.itemgetter(1))[0]
+            emotions_count_dict_after[max_sent]+=1
             pos_count+=1
-            
-        for word in pos_word_list:
-            for sentiment in emotion_fetcher.get_emotion(word):
-                emotions_count_dict_after[sentiment]+=1
-
-
+        
         print(emotions_count_dict_after)
         dump_file_name="emotions_"+item+"_after.json"
         twitterati.dump_to_json('jsons',dump_file_name,emotions_count_dict_after)
         print(pos_count)
 
 
-        emotions_count_dict_before = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"negative":0,"positive":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
+        #-----------------------------------------------------------------------------------
+
+        
+        emotions_count_dict_before = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"against":0,"for":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
         print("Creating count for before tweets...")
         neg_count=0
         emotions_list=[]
         neg_word_list=[]
         for tweet_dict in before_tokens_for_model:
+            sent_dict={"anger": 0,"anticipation": 0,"disgust": 0,"fear": 0,"joy": 0,"against": 0,"for": 0,"sadness": 0,"surprise": 0,"trust": 0,"unclassified": 0}
             for word,tag in pos_tag(tweet_dict):
-                neg_word_list.append(word)
+                for sentiment in emotion_fetcher.get_emotion(word):
+                    sent_dict[sentiment]+=1
+            del sent_dict['anger']
+            del sent_dict['anticipation']
+            del sent_dict['disgust']
+            del sent_dict['fear']
+            #del sent_dict['joy']
+            #del sent_dict['against']
+            #del sent_dict['for']
+            del sent_dict['sadness']
+            #del sent_dict['surpirse']
+            #del sent_dict['trust']
+            del sent_dict['unclassified']
+            max_sent=max(sent_dict.items(), key=operator.itemgetter(1))[0]
+            emotions_count_dict_before[max_sent]+=1
             neg_count+=1
-
- 
-        for word in neg_word_list:
-            for sentiment in emotion_fetcher.get_emotion(word):
-                emotions_count_dict_before[sentiment]+=1
 
 
         print(emotions_count_dict_before)
         dump_file_name="emotions_"+item+"_before.json"
-        twitterati.dump_to_json('jsons',dump_file_name,emotions_count_dict_after)
+        twitterati.dump_to_json('jsons',dump_file_name,emotions_count_dict_before)
         print(neg_count)
     
 
-        #removing positive and negative keys from dict.
-        del emotions_count_dict_after['positive']
-        del emotions_count_dict_after['negative']
-        del emotions_count_dict_before['positive']
-        del emotions_count_dict_before['negative']
+        #removing for and against keys from dict.
+        del emotions_count_dict_after['anger']
+        del emotions_count_dict_after['anticipation']
+        del emotions_count_dict_after['disgust']
+        del emotions_count_dict_after['fear']
+        #del emotions_count_dict_after['joy']
+        #del emotions_count_dict_after['against']
+        #del emotions_count_dict_after['for']
+        del emotions_count_dict_after['sadness']
+        #del emotions_count_dict_after['surpirse']
+        #del emotions_count_dict_after['trust']
+        del emotions_count_dict_after['unclassified']
+
+        del emotions_count_dict_before['anger']
+        del emotions_count_dict_before['anticipation']
+        del emotions_count_dict_before['disgust']
+        del emotions_count_dict_before['fear']
+        #del emotions_count_dict_before['joy']
+        #del emotions_count_dict_before['against']
+        #del emotions_count_dict_before['for']
+        del emotions_count_dict_before['sadness']
+        #del emotions_count_dict_before['surpirse']
+        #del emotions_count_dict_before['trust']
+        del emotions_count_dict_before['unclassified']
 
         #plot_overall_count(pos_count, neg_count)
         plot_emotion_graphs(emotions_count_dict_after,emotions_count_dict_before,item)
-
+        print('total tweets:')
+        print(total_tweets)
+        print("--------------------------------------------------------------------------------\n")
+        
 if __name__ == '__main__':
     main()

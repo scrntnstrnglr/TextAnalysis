@@ -7,8 +7,8 @@ import os
 import sys
 
 class Lexicon:
-    emotions_dict = {"anger":[],"anticipation":[],"disgust":[],"fear":[],"joy":[],"negative":[],"positive":[],"sadness":[],"surprise":[],"trust":[],"unclassified":[]}
-    emotions_count_dict = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"negative":0,"positive":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
+    emotions_dict = {"anger":[],"anticipation":[],"disgust":[],"fear":[],"joy":[],"against":[],"for":[],"sadness":[],"surprise":[],"trust":[],"unclassified":[]}
+    emotions_count_dict = {"anger":0,"anticipation":0,"disgust":0,"fear":0,"joy":0,"against":0,"for":0,"sadness":0,"surprise":0,"trust":0,"unclassified":0}
     def __init__(self,emo_word_file):
         cwd = os.getcwd()
         self._load_emotions(emo_word_file)
