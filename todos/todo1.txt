@@ -1,0 +1,37 @@
+1. statement of roles signed by all.
+	Ambassador - Sid
+	Chair - Soumen
+	Recorder - Jagadish
+	Verifier - Mrinal
+	Accountant -
+	
+Siddhartha -  python packages nltk and nrc
+Jagadish - data collection, twitter API, getoldtweets
+Soumen -  literature review
+Mrinal - latex, documentation
+try to copmlete this by today 6, and give to jagadish to print. meet up tomorrow at kavanagh to sign - scan and update.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Documentation
+
+Title of Paper - Detecting emotional changes from twitter before and after elections
+
+keywords - sentiment analysis, elections, twitter, before and after effects, language processing, NRC
+
+Abstract - Jagadish
+
+Introduction - Soumen -> nrc nltk
+
+Related Work - Mrinal (open)
+
+Mehods - jagadish and sid
+	-> data collection - jagadish, table (parties..candidates)
+	-> processing - sid - advantage of nrc
+
+Results - Siddhartha (graphs)
+
+Future work - Mrinal - work on emoticons, compare results with real time data 
+
+Conclusion - Soumen
+
+Bibliography - All
