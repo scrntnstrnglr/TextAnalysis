@@ -55,15 +55,6 @@ class TwitterManager:
             this_tweet_tokens=self.tokenize(this_tweets)
             self.tweet_token_dict[this_file_name][this_file_seq] = this_tweet_tokens
         
-        '''
-        if name is not None:
-            self.dump_to_json('jsons',name+".tweets.json",self.tweet_list_dict)
-            self.dump_to_json('jsons',name+".tokens.json",self.tweet_token_dict)
-        else:
-            self.dump_to_json('jsons',"all.tweets.json",self.tweet_list_dict)
-            self.dump_to_json('jsons',"all.tokens.json",self.tweet_token_dict)
-        '''
-        
     
     def create_tweets_list(self,data_file):
         self.tweet_tokens=[]
