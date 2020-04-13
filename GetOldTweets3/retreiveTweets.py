@@ -20,15 +20,15 @@ from datetime import datetime, timedelta
 
 #subtract the same number of timedelta days in since_date to the current timedelta days in until_date to
 #set until_date to since_date
-until_date = datetime.now() - timedelta(days = 165)
-since_date = until_date - timedelta(days = 26)
+until_date = datetime.now() - timedelta(days = 51)
+since_date = until_date - timedelta(days = 1)
 
 until_date = until_date.strftime("%Y-%m-%d")
 since_date = since_date.strftime("%Y-%m-%d")
 
 language = "en"
 emoji = "unicode"
-#maxtweets = 5000
+maxtweets = 100
 
 fileExtension = ".csv"
 
@@ -56,7 +56,7 @@ candidates_dict = {
 
 #        Party Twitter Handles
 #        "Fine_Gael": ["#finegael", "@FineGael"],
-        "Fianna_Fáil": ["#fiannafail", "@fiannafailparty"],
+#        "Fianna_Fáil": ["#fiannafail", "@fiannafailparty"],
 #        "Sinn_Féin": ["#sinnfein", "@sinnfeinireland"],
 #        "Green_Party": ["#greenparty", "@greenparty_ie"],
 #        "Labour": ["#labour", "@labour"],
@@ -66,6 +66,7 @@ candidates_dict = {
 
 #        Hashtags
 #        "Hashtags": ["#ge2020", "#ge20", "#generalelections2020", "#leadersdebate", #generalelection2020", "#generalelection" ],
+        "Corona" : ["#covid19", "#coronavirus"]
 }
 
 #Toggle the before value for each of the candidates above to get the before and after datasets
@@ -112,15 +113,22 @@ for key, values in candidates_dict.items():
 
     try:
         print("Downloading tweets for... " + outputFileName)
-        for value in values:
-            tweetCriteria = got.manager.TweetCriteria().setQuerySearch(value)\
-                                                        .setSince(since_date)\
-                                                        .setUntil(until_date)\
-                                                        .setLang(language)\
-                                                        .setEmoji(emoji)
-#                                                        .setMaxTweets(maxtweets)\
 
-            tweets = got.manager.TweetManager.getTweets(tweetCriteria, receiveBuffer);
+        while(since_date != "2019-06-30"):
+            for value in values:
+                tweetCriteria = got.manager.TweetCriteria().setQuerySearch(value)\
+                                                            .setSince(since_date)\
+                                                            .setUntil(until_date)\
+                                                            .setLang(language)\
+                                                            .setEmoji(emoji)\
+                                                            .setMaxTweets(maxtweets)\
+
+                tweets = got.manager.TweetManager.getTweets(tweetCriteria, receiveBuffer)
+            
+            until_date = datetime.strptime(until_date, '%Y-%m-%d') - timedelta(days = 1)
+            until_date = until_date.strftime("%Y-%m-%d")
+            since_date = datetime.strptime(since_date, '%Y-%m-%d') - timedelta(days = 1)
+            since_date = since_date.strftime("%Y-%m-%d")
 
     except KeyboardInterrupt:
             print("\r\nInterrupted.\r\n")
